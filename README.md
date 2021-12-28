@@ -32,7 +32,7 @@ requests
 
 ## 鸣谢
 
-使用Github Aciton自动填写疫情通 (hyyps://cnblogs.com/soowin/p/13461451.html )
+使用Github Aciton自动填写疫情通 (https://cnblogs.com/soowin/p/13461451.html )
 
 西安电子科技大学疫情通、晨午晚检自动填报工具 (https://github.com/jiang-du/Auto-dailyup )
 
