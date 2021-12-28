@@ -239,7 +239,10 @@ def dailyUp():
             print("填报错误")
             success = 0
     return success
-        
+
+# 登录后立即上报一次
+dailyUp()
+
 while True:
     currentState = checkTime(time_lib)
     currentHour, currentMinute, currentSecond = getCurrentTime()
