@@ -22,16 +22,25 @@ Credits:
 Lisense:
     GNU General Public License v3.0 (gpl-3.0)
 '''
+# ------------------------------------------------ #
+
+# 用户修改配置区域
+
+# 登录学号和密码。修改以登录自己的账户
+USERNAME = "7h1515y0uru53rn4m3"
+PASSWORD = "7h1515y0ur9455w0r6"
+
+# 通过 Qmsg 接口将填报状态推送至 QQ ，此功能默认关闭，填入自己的 QmsgKEY 并设为 True 以启用 
+Qmsg = False
+QmsgKEY = "7h1515y0ur70k3n"
+
+# ------------------------------------------------ #
 
 import datetime
 import json
 import random
 import requests
 import time
-
-# 登录学号和密码。修改以登录自己的账户
-USERNAME = '1145141919810'
-PASSWORD = '@31415926qwertY'
 
 # 填报信息表
 NORTH_UPLOAD_MSG = {
@@ -173,7 +182,6 @@ def getCurrentTime():
 
 # 随机更新下一天填报时间
 def updateTimeLib(time_lib):
-
     assert len(time_lib) == 6
     new_time = time_lib
     new_time[1] = random.randint(2,59)
@@ -185,7 +193,6 @@ def updateTimeLib(time_lib):
 
 # 判断当前是否需要上报
 def checkTime(time_lib):
-
     currentHour, currentMinute, currentSecond = getCurrentTime()
     if currentHour == time_lib[0] and currentMinute == time_lib[1]:
         # 晨检
@@ -208,6 +215,27 @@ def checkTime(time_lib):
         print("当前系统时间  %02d:%02d:%02d" % (currentHour, currentMinute, currentSecond))
     return currentState
 
+# Qmsg 消息推送
+def QmsgPush(currentState,success):
+    if Qmsg == False:
+        return 0
+    QmsgURL = "https://qmsg.zendee.cn/send/{}".format(QmsgKEY)
+    if currentState == 1:
+        msgState = "晨检"
+    elif currentState == 2:
+        msgState = "午检"
+    elif currentState == 3:
+        msgState = "晚检"
+    else:
+        msgState = "其他"
+    if success == 1:
+        msgSuccess = "填报成功"
+    elif success == 2:
+        msgSuccess = "已填报过"
+    else:
+        msgSuccess = "填报失败"
+    requests.post(QmsgURL, data = {'msg': '[自动填报]\n时间: {}\n类别: {}\n状态: {}'.format(datetime.datetime.now(),msgState,msgSuccess)})
+
 # 登录
 conn = requests.Session()
 result = conn.post(url = "https://xxcapp.xidian.edu.cn/uc/wap/login/check", data = {'username': USERNAME, 'password': PASSWORD})
@@ -225,8 +253,9 @@ if(msg == "登录失败，正在退出"):
     exit()
 
 # 填报晨午晚检
-def dailyUp():
+def dailyUp(currentState):
     result = conn.post(url = "https://xxcapp.xidian.edu.cn/xisuncov/wap/open-report/save", data = currentUploadMsg)
+    success = 0
     if result.json()['e'] == 0:
         print("填报成功")
         success = 1
@@ -235,24 +264,22 @@ def dailyUp():
         if (state == "您已上报过"):
             print("已填报过")
             success = 2
-        else:
-            print("填报错误")
-            success = 0
+    QmsgPush(currentState,success)
     return success
 
 # 登录后立即上报一次
-dailyUp()
+dailyUp(checkTime(time_lib))
 
 while True:
     currentState = checkTime(time_lib)
     currentHour, currentMinute, currentSecond = getCurrentTime()
     # 晨、午、晚填报，填报失败则重试两次
     if currentState in (1, 2, 3):
-        if dailyUp() == 0:
+        if dailyUp(currentState) == 0:
             time.sleep(90)
-            if dailyUp() == 0:
+            if dailyUp(currentState) == 0:
                 time.sleep(180)
-                if dailyUp == 0:
+                if dailyUp(currentState) == 0:
                     print("连续三次填报失败")
     # 上报结束后冷却时间
         time.sleep(180)
