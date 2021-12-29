@@ -255,7 +255,6 @@ if(msg == "登录失败，正在退出"):
 # 填报晨午晚检
 def dailyUp(currentState):
     result = conn.post(url = "https://xxcapp.xidian.edu.cn/xisuncov/wap/open-report/save", data = currentUploadMsg)
-    success = 0
     if result.json()['e'] == 0:
         print("填报成功")
         success = 1
@@ -264,6 +263,9 @@ def dailyUp(currentState):
         if (state == "您已上报过"):
             print("已填报过")
             success = 2
+        else:
+            print("填报错误")
+            success = 0
     QmsgPush(currentState,success)
     return success
 
