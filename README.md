@@ -24,13 +24,17 @@ requests
 
 将本程序下载到本地。
 
-在 USERNAME 、 PASSWORD 处填入自己的学号和密码。在 currentUploadMsg 处将填报信息改为信息表中对应的自己的信息，默认南校区。
+在 USERNAME 、PASSWORD 处填入自己的学号和密码。在 currentUploadMsg 处将填报信息改为信息表中对应的自己的信息，默认南校区。
+
+若想程序在每次填报时将当次填报信息，即填报时间、填报类别（晨检/午检/晚检/其他）、填报状态（填报成功/已填报过/填报失败）推送到推送至 QQ ，请在 Qmsg 按手册注册，在本程序 QmsgKEY 处填入自己的 KEY ，并将 Qmsg 设为 True 开启推送功能。
 
 保持运行本程序，本程序将自动在相应时段填报晨午晚检。
 
 
 
 ## 鸣谢
+
+Qmsg酱（https://qmsg.zendee.cn/ ）
 
 使用Github Aciton自动填写疫情通 (https://cnblogs.com/soowin/p/13461451.html )
 
