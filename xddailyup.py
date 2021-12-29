@@ -14,7 +14,8 @@ Usage:
     在 USERNAME 、 PASSWORD 处填入自己的学号和密码。
     在 currentUploadMsg 处将填报信息改为信息表中对应的自己的信息，默认南校区。
     保持运行本程序，本程序将自动在相应时段填报晨午晚检。
-Credits: 
+Credits:
+    Qmsg酱（https://qmsg.zendee.cn/ ）
     使用Github Aciton自动填写疫情通 (hyyps://cnblogs.com/soowin/p/13461451.html )
     西安电子科技大学疫情通、晨午晚检自动填报工具 (https://github.com/jiang-du/Auto-dailyup )
     西安电子科技大学(包含广州研究院)晨午晚检自动填报工具 (https://github.com/HANYIIK/Auto-dailyup )
@@ -22,6 +23,7 @@ Credits:
 Lisense:
     GNU General Public License v3.0 (gpl-3.0)
 '''
+
 # ------------------------------------------------ #
 
 # 用户修改配置区域
@@ -182,6 +184,7 @@ def getCurrentTime():
 
 # 随机更新下一天填报时间
 def updateTimeLib(time_lib):
+
     assert len(time_lib) == 6
     new_time = time_lib
     new_time[1] = random.randint(2,59)
@@ -193,6 +196,7 @@ def updateTimeLib(time_lib):
 
 # 判断当前是否需要上报
 def checkTime(time_lib):
+
     currentHour, currentMinute, currentSecond = getCurrentTime()
     if currentHour == time_lib[0] and currentMinute == time_lib[1]:
         # 晨检
@@ -215,6 +219,38 @@ def checkTime(time_lib):
         print("当前系统时间  %02d:%02d:%02d" % (currentHour, currentMinute, currentSecond))
     return currentState
 
+# 登录
+conn = requests.Session()
+result = conn.post(url = "https://xxcapp.xidian.edu.cn/uc/wap/login/check", data = {'username': USERNAME, 'password': PASSWORD})
+loginTries = 0
+while True:
+    if loginTries == 5:
+        msg = "登录失败，正在退出"
+    if result.status_code == 200:
+        msg = "登录成功"
+        break
+    elif loginTries < 5:
+        msg = "错误信息: {}".format(result.status_code)
+print(msg)
+if(msg == "登录失败，正在退出"):
+    exit()
+
+# 填报晨午晚检
+def dailyUp():
+    result = conn.post(url = "https://xxcapp.xidian.edu.cn/xisuncov/wap/open-report/save", data = currentUploadMsg)
+    if result.json()['e'] == 0:
+        print("填报成功")
+        success = 1
+    else:
+        state = result.json()['m']
+        if state == "您已上报过":
+            print("已填报过")
+            success = 2
+        else:
+            print("填报错误")
+            success = 0
+    return success
+
 # Qmsg 消息推送
 def QmsgPush(currentState,success):
     if Qmsg == False:
@@ -236,52 +272,25 @@ def QmsgPush(currentState,success):
         msgSuccess = "填报失败"
     requests.post(QmsgURL, data = {'msg': '[自动填报]\n时间: {}\n类别: {}\n状态: {}'.format(datetime.datetime.now(),msgState,msgSuccess)})
 
-# 登录
-conn = requests.Session()
-result = conn.post(url = "https://xxcapp.xidian.edu.cn/uc/wap/login/check", data = {'username': USERNAME, 'password': PASSWORD})
-loginTries = 0
-while True:
-    if loginTries == 5:
-        msg = "登录失败，正在退出"
-    if result.status_code == 200:
-        msg = "登录成功"
-        break
-    elif loginTries < 5:
-        msg = "错误信息: {}".format(result.status_code)
-print(msg)
-if(msg == "登录失败，正在退出"):
-    exit()
-
-# 填报晨午晚检
-def dailyUp(currentState):
-    result = conn.post(url = "https://xxcapp.xidian.edu.cn/xisuncov/wap/open-report/save", data = currentUploadMsg)
-    if result.json()['e'] == 0:
-        print("填报成功")
-        success = 1
-    else:
-        state = result.json()['m']
-        if (state == "您已上报过"):
-            print("已填报过")
-            success = 2
-        else:
-            print("填报错误")
-            success = 0
-    QmsgPush(currentState,success)
-    return success
-
 # 登录后立即上报一次
-dailyUp(checkTime(time_lib))
+success = dailyUp()
+QmsgPush(checkTime(time_lib),success)
 
 while True:
     currentState = checkTime(time_lib)
-    currentHour, currentMinute, currentSecond = getCurrentTime()
     # 晨、午、晚填报，填报失败则重试两次
     if currentState in (1, 2, 3):
-        if dailyUp(currentState) == 0:
+        success = dailyUp()
+        QmsgPush(currentState,success)
+        if success == 0:
             time.sleep(90)
-            if dailyUp(currentState) == 0:
+            success = dailyUp()
+            QmsgPush(currentState,success)
+            if success == 0:
                 time.sleep(180)
-                if dailyUp(currentState) == 0:
+                success = dailyUp()
+                QmsgPush(currentState,success)
+                if success == 0:
                     print("连续三次填报失败")
     # 上报结束后冷却时间
         time.sleep(180)
