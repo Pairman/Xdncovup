@@ -38,6 +38,7 @@ QmsgKEY = "7h1515y0ur70k3n"
 
 # ------------------------------------------------ #
 
+from asyncio.windows_events import NULL
 import datetime
 import json
 import random
@@ -237,19 +238,22 @@ if(msg == "登录失败，正在退出"):
 
 # 填报晨午晚检
 def dailyUp():
-    result = conn.post(url = "https://xxcapp.xidian.edu.cn/xisuncov/wap/open-report/save", data = currentUploadMsg)
-    if result.json()['e'] == 0:
-        print("填报成功")
-        success = 1
-    else:
-        state = result.json()['m']
-        if state == "您已上报过":
-            print("已填报过")
-            success = 2
+    result=NULL
+    try:
+        result = conn.post(url = "https://xxcapp.xidian.edu.cn/xisuncov/wap/open-report/save", data = currentUploadMsg)
+        if result.json()['e'] == 0:
+            print("填报成功")
+            success = 1
         else:
-            print("填报错误")
-            success = 0
-    return success
+            if result.json()['m'] == "您已上报过":
+                print("已填报过")
+                return 2
+            else:
+                print("填报错误")
+                return 0
+        return success
+    except:
+        return 0
 
 # Qmsg 消息推送
 def QmsgPush(currentState,success):
@@ -270,7 +274,10 @@ def QmsgPush(currentState,success):
         msgSuccess = "已填报过"
     else:
         msgSuccess = "填报失败"
-    requests.post(QmsgURL, data = {'msg': '[自动填报]\n时间: {}\n类别: {}\n状态: {}'.format(datetime.datetime.now(),msgState,msgSuccess)})
+    try:
+        requests.post(QmsgURL, data = {'msg': '[自动填报]\n时间: {}\n类别: {}\n状态: {}'.format(datetime.datetime.now(),msgState,msgSuccess)})
+    except:
+        pass
 
 # 登录后立即上报一次
 success = dailyUp()
