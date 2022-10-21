@@ -64,6 +64,8 @@ currentUploadMsg={
 # 默认上报时间
 upHour,upMinute=8,30
 
+print("核酸检测情况自动上报")
+
 # 登录
 conn=requests.Session()
 logined=0
