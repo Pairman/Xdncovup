@@ -41,7 +41,6 @@
 GNU General Public License v3.0 (gpl-3.0)
 '''
 
-from asyncio.windows_events import NULL
 from datetime import datetime
 from getopt import getopt
 from random import randint
@@ -109,7 +108,7 @@ upHour,upMinute=8,30
 conn=Session()
 logined=0
 for i in range(3):
-    result=NULL
+    result=None
     try:
         result=conn.post(url="https://xxcapp.xidian.edu.cn/uc/wap/login/check",data={"username":USERNAME,"password":PASSWORD},verify=not DEBUG)
         if result.json()['e']==0:
@@ -125,7 +124,7 @@ if not logined:
 
 # 连续三次尝试上报核酸检测情况
 def ncovUp():
-    result=NULL
+    result=None
     for i in range(3):
         try:
             result=conn.post(url="https://xxcapp.xidian.edu.cn/forms/wap/default/get-info?formid=563",verify=not DEBUG)
