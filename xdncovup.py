@@ -50,9 +50,9 @@ from time import sleep
 
 opts=getopt(argv[1:],"hu:p:l:d",["help","username=","password=","location=","debug"])[0]
 
-USERNAME,PASSWORD,LOCATION,DEBUG="","","",False
+USERNAME,PASSWORD,LOCATION,DEBUG="","","中国陕西省西安市长安区",False
 
-helpMsg="""Xdncovup - 西安电子科技大学核酸检测情况自动上报工具 1.1 (2022 Oct 21, Pairman)
+helpMsg="""Xdncovup - 西安电子科技大学核酸检测情况自动上报工具 1.2 (2022 Oct 22, Pairman)
 本程序仅供学习交流使用，使用本程序造成的任何后果由用户自行负责。
 用法：
     python3 %s [参数]
@@ -60,7 +60,7 @@ helpMsg="""Xdncovup - 西安电子科技大学核酸检测情况自动上报工�
     -h,--help                   输出帮助信息
     -u,--username <学号>        指定学号
     -p,--password <密码>        指定密码
-    -l,--location <上报地址>    指定上报地址（格式：某国某省某市某县/区）
+    -l,--location <上报地址>    指定上报地址（格式：某国某省某市某县/区，默认：中国陕西省西安市长安区）
     -d,--debug                  进入调试模式
 """%(argv[0])
 
@@ -88,9 +88,6 @@ if USERNAME=="":
     exit()
 if PASSWORD=="":
     print("请指定密码！")
-    exit()
-if LOCATION=="":
-    print("请指定上报地址！")
     exit()
 
 # 上报信息表
@@ -129,6 +126,7 @@ def ncovUp():
         try:
             result=conn.post(url="https://xxcapp.xidian.edu.cn/forms/wap/default/get-info?formid=563",verify=not DEBUG)
             currentUploadMsg["value[id]"]=result.json()['d']['value']['id']
+            currentUploadMsg["value[date_563_2]"]=str(datetime.now())[0:10]
             result=conn.post(url="https://xxcapp.xidian.edu.cn/forms/wap/default/save",data=currentUploadMsg,verify=not DEBUG)
             if result.json()['e']==0:
                 print("上报成功")
@@ -150,7 +148,6 @@ while True:
     currentHour,currentMinute=int(str(currentTime)[11:13]),int(str(currentTime)[14:16])
     # 到上报时间时尝试上报
     if currentHour==upHour and currentMinute==upMinute:
-        currentUploadMsg["value[date_563_2]"]=str(datetime.now())[0:10]
         ncovUp()
     # 其他时刻暂停上报
     elif currentHour<upHour or (currentHour==upHour and currentMinute<upMinute-10):
