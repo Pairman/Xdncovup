@@ -1,4 +1,3 @@
-'''
 # Author
 
 [Pairman](https://github.com/Pairman)
@@ -28,5 +27,3 @@
 # Lisense
 
 GNU General Public License v3.0 (gpl-3.0)
-
-'''
