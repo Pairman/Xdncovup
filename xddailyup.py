@@ -42,6 +42,9 @@ PASSWORD=""
 # 上报地址，如某国某省某市某县/区，在引号内修改
 LOCATION=""
 
+# 调试用，不懂勿动
+NOTDEBUG=True
+
 # ------------------------------------------------ #
 
 from asyncio.windows_events import NULL
@@ -67,7 +70,7 @@ logined=0
 for i in range(3):
     result=NULL
     try :
-        result=conn.post(url="https://xxcapp.xidian.edu.cn/uc/wap/login/check",data={"username":USERNAME,"password":PASSWORD},verify=False)
+        result=conn.post(url="https://xxcapp.xidian.edu.cn/uc/wap/login/check",data={"username":USERNAME,"password":PASSWORD},verify=NOTDEBUG)
         if result.json()['e']==0:
             logined=1
             print("登录成功")
@@ -84,9 +87,9 @@ def ncovUp():
     result=NULL
     for i in range(3):
         try:
-            result=conn.post(url="https://xxcapp.xidian.edu.cn/forms/wap/default/get-info?formid=563",verify=False)
+            result=conn.post(url="https://xxcapp.xidian.edu.cn/forms/wap/default/get-info?formid=563",verify=NOTDEBUG)
             currentUploadMsg["value[id]"]=result.json()['d']['value']['id']
-            result=conn.post(url="https://xxcapp.xidian.edu.cn/forms/wap/default/save",data=currentUploadMsg,verify=False)
+            result=conn.post(url="https://xxcapp.xidian.edu.cn/forms/wap/default/save",data=currentUploadMsg,verify=NOTDEBUG)
             if result.json()['e']==0:
                 print("上报成功")
                 return 1
