@@ -52,7 +52,7 @@ opts=getopt(argv[1:],"hu:p:l:d",["help","username=","password=","location=","deb
 
 USERNAME,PASSWORD,LOCATION,DEBUG="","","中国陕西省西安市长安区",False
 
-helpMsg="""Xdncovup - 西安电子科技大学核酸检测情况自动上报工具 1.2 (2022 Oct 22, Pairman)
+helpMsg="""Xdncovup - 西安电子科技大学核酸检测情况自动上报工具 1.3 (2022 Oct 22, Pairman)
 本程序仅供学习交流使用，使用本程序造成的任何后果由用户自行负责。
 用法：
     python3 %s [参数]
@@ -115,6 +115,7 @@ for i in range(3):
         print("登录失败：",result.json()['m'])
     except:
         print("登录失败：异常")
+    sleep(60)
 if not logined:
     print("登录失败，正在退出")
     exit()
@@ -137,6 +138,7 @@ def ncovUp():
             print("填报失败")
         except:
             pass
+        sleep(60)
     print("连续三次填报失败")
     return 0
 
@@ -147,16 +149,18 @@ while True:
     currentTime=datetime.now()
     currentHour,currentMinute=int(str(currentTime)[11:13]),int(str(currentTime)[14:16])
     # 到上报时间时尝试上报
-    if currentHour==upHour and currentMinute==upMinute:
+    timeDiff=3600*upHour+60*upMinute-3600*currentHour-60*currentMinute
+    if timeDiff==0:
+        print("今天是%02d年%02d月%02d日"%(str(currentTime)[0:4],str(currentTime)[5:7],str(currentTime)[8:10]))
         ncovUp()
     # 其他时刻暂停上报
-    elif currentHour<upHour or (currentHour==upHour and currentMinute<upMinute-10):
-        sleep(29340-3600*currentHour-60*currentMinute)
-    elif currentHour>upHour or (currentHour==upHour and currentMinute>upMinute):
+    elif timeDiff>300:
+        timeDiff-=300
+        sleep(86400+timeDiff)
+    elif timeDiff<0:
         upMinute=randint(10,50)
         print("更新核酸检测情况上报时间成功！下一天上报的时间为:%02d时%02d分"%(upHour,upMinute))
-        print("程序进入休眠")
-        # halt till 8:09 next day
-        sleep(86100+3600*upHour-3600*currentHour+60*upMinute-60*currentMinute)
+        timeDiff=86100+3600*upHour+60*upMinute-3600*currentHour-60*currentMinute
+        sleep(timeDiff)
     else:
-        sleep(60)
+        sleep(50)
