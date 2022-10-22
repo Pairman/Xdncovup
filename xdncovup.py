@@ -22,7 +22,7 @@
     -h,--help                   输出帮助信息
     -u,--username <学号>        指定学号
     -p,--password <密码>        指定密码
-    -l,--location <上报地址>    指定上报地址（格式：某国某省某市某县/区，默认：中国陕西省西安市长安区）
+    -l,--location <上报地址>    指定上报地址（格式：某国某省某市某县/区）
     -d,--debug                  进入调试模式
 ```
 
@@ -103,13 +103,13 @@ upHour,upMinute=8,30
 
 # 登录
 conn=Session()
-logined=0
+logined=False
 for i in range(3):
     result=None
     try:
         result=conn.post(url="https://xxcapp.xidian.edu.cn/uc/wap/login/check",data={"username":USERNAME,"password":PASSWORD},verify=not DEBUG)
         if result.json()['e']==0:
-            logined=1
+            logined=True
             print("登录成功")
             break
         print("登录失败：",result.json()['m'])
