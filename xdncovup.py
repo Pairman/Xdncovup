@@ -52,7 +52,7 @@ opts=getopt(argv[1:],"hu:p:l:d",["help","username=","password=","location=","deb
 
 USERNAME,PASSWORD,LOCATION,DEBUG="","","中国陕西省西安市长安区",False
 
-helpMsg="""Xdncovup - 西安电子科技大学核酸检测情况自动上报工具 1.5 (2022 Oct 23, Pairman)
+helpMsg="""Xdncovup - 西安电子科技大学核酸检测情况自动上报工具 1.6 (2022 Oct 23, Pairman)
 本程序仅供学习交流使用，使用本程序造成的任何后果由用户自行负责。
 用法：
     python3 %s [参数]
@@ -131,14 +131,15 @@ def ncovUp():
             result=conn.post(url="https://xxcapp.xidian.edu.cn/forms/wap/default/save",data=currentUploadMsg,verify=not DEBUG)
             if result.json()['e']==0:
                 print("上报成功")
+                sleep(60)
                 return 1
             elif result.json()['m']=="每日仅能提交一次":
                 print("已上报过")
+                sleep(60)
                 return 2
             print("填报失败")
         except:
-            pass
-        sleep(60)
+            sleep(60)
     print("连续三次填报失败")
     return 0
 
